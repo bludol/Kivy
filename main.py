@@ -11,13 +11,13 @@ import random
 class GameWidget(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
+#Widget pro hru
 
         self._keyboard = Window.request_keyboard(
             self._on_keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_key_down)
         self._keyboard.bind(on_key_up=self._on_key_up)
-
+#"Vstup" klávesnice
 
         self._score_label = CoreLabel(text="Score: 0",font_size=20)
         self._score_label.refresh()
@@ -31,7 +31,7 @@ class GameWidget(Widget):
                       size=(Window.width, Window.height))
             self._score_instruction = Rectangle(texture=self._score_label.texture, pos=(
                 0, Window.height - 50), size=self._score_label.texture.size)
-
+#Vykreslení pozadí  + score
 
         self.keysPressed = set()
         self._entities = set()
@@ -50,6 +50,7 @@ class GameWidget(Widget):
             y = Window.height
             random_speed = random.randint(100, 300)
             self.add_entity(Enemy((random_x, y), random_speed))
+#Tvorba a vykreslování nepřátel
 
     def _on_frame(self, dt):
         self.dispatch("on_frame", dt)
@@ -69,6 +70,7 @@ class GameWidget(Widget):
         self._score_label.refresh()
         self._score_instruction.texture = self._score_label.texture
         self._score_instruction.size = self._score_label.texture.size
+#Aktualizace score
 
     def add_entity(self, entity):
         self._entities.add(entity)
@@ -95,7 +97,7 @@ class GameWidget(Widget):
             return True
         else:
             return False
-
+#Detekce kolizí
 
     def colliding_entities(self, entity):
         result = set()
@@ -103,13 +105,14 @@ class GameWidget(Widget):
             if self.collides(e, entity) and e != entity:
                 result.add(e)
         return result
+#Připisování kolidujících entit do proměné result
 
 
     def _on_keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_key_down)
         self._keyboard.unbind(on_key_up=self._on_key_up)
         self._keyboard = None
-
+#Uzavření klávesnice a odbindování kláves
     def _on_key_down(self, keyboard, keycode, text, modifiers):
         self.keysPressed.add(keycode[1])
 
@@ -123,9 +126,10 @@ class Entity(object):
     def __init__(self):
         self._pos = (0, 0)
         self._size = (50, 50)
-        self._source = "bullshit.png"
+        self._source = "tank.png"
         self._instruction = Rectangle(
             pos=self._pos, size=self._size, source=self._source)
+#Základní herní entitka. Používaní dále k dědičnosti
 
     @property
     def pos(self):
@@ -164,10 +168,11 @@ class Bullet(Entity):
         self.pos = pos
         self.source = "assets/bullet.png"
         game.bind(on_frame=self.move_step)
-
+#Střelba
+    
     def stop_callbacks(self):
         game.unbind(on_frame=self.move_step)
-
+#zastavení pohybu
     def move_step(self, sender, dt):
 
         if self.pos[1] > Window.height:
@@ -183,7 +188,8 @@ class Bullet(Entity):
                 game.remove_entity(e)
                 game.score += 1
                 return
-
+#Odstraní střelu při odletění z mapy či střetu. Zároveň vyvolává výbuch
+        
         step_size = self._speed * dt
         new_x = self.pos[0]
         new_y = self.pos[1] + step_size
@@ -197,7 +203,7 @@ class Enemy(Entity):
         self.pos = pos
         self.source = "assets/enemy.png"
         game.bind(on_frame=self.move_step)
-
+#Vytvoření nepřátel
     def stop_callbacks(self):
         game.unbind(on_frame=self.move_step)
 
@@ -215,7 +221,7 @@ class Enemy(Entity):
                 game.remove_entity(self)
                 game.score -= 1
                 return
-
+#Odstranění nepřžítele 
         step_size = self._speed * dt
         new_x = self.pos[0]
         new_y = self.pos[1] - step_size
@@ -230,7 +236,7 @@ class Explosion(Entity):
         self.source = "assets/explosion.png"
         sound.play()
         Clock.schedule_once(self._remove_me, 0.1)
-
+#Exploze vyvolaná po střetu střely s nepřítelem
     def _remove_me(self, dt):
         game.remove_entity(self)
 
@@ -245,7 +251,7 @@ class Player(Entity):
         game.bind(on_frame=self.move_step)
         self._shoot_event = Clock.schedule_interval(self.shoot_step, 0.5)
         self.pos = (400, 0)
-
+#Hráč
     def stop_callbacks(self):
         game.unbind(on_frame=self.move_step)
         self._shoot_event.cancel()
@@ -278,7 +284,7 @@ player2 = Player()
 player2.pos = (Window.width/3, 0)
 game.add_entity(player2)
 
-
+#Spuštění hry
 class MyApp(App):
     def build(self):
         return game
