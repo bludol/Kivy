@@ -126,7 +126,7 @@ class Entity(object):
     def __init__(self):
         self._pos = (0, 0)
         self._size = (50, 50)
-        self._source = "tank.png"
+        self._source = "IDK.png"
         self._instruction = Rectangle(
             pos=self._pos, size=self._size, source=self._source)
 #Základní herní entitka. Používaní dále k dědičnosti
